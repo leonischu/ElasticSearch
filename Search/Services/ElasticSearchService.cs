@@ -27,19 +27,24 @@ namespace Search.Services
             return response.IsValid ? "Document deleted sucessfully" : "Failed to delete document";
         }
 
-        public Task<IEnumerable<T>> GetAllDocuments()
+        public async Task<IEnumerable<T>> GetAllDocuments()
         {
-            throw new NotImplementedException();
+            var searchResponse = await _elasticClient.SearchAsync<T>(s => s.MatchAll().Size(1000));
+            return searchResponse.Documents;
         }
 
-        public Task<T> GetDocumentAsync(int id)
+        public async Task<T> GetDocumentAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _elasticClient.GetAsync(new DocumentPath<T>(id));
+            return response.Source;
         }
 
-        public Task<string> UpdateDocumentAsync(T document)
+        public async Task<string> UpdateDocumentAsync(T document)
         {
-            throw new NotImplementedException();
+            var response = await _elasticClient.UpdateAsync(new DocumentPath<T>(document), u => u
+            .Doc(document)
+            .RetryOnConflict(3));
+            return response.IsValid ? "Document updated sucessfully" : "Failed to update document";
         }
     }
 }
