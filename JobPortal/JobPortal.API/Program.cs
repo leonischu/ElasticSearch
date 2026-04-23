@@ -3,8 +3,10 @@ using JobPortal.API.Mapper;
 using JobPortal.Application.Handlers;
 using JobPortal.Application.Interfaces;
 using JobPortal.Infrastructure.Database;
+using JobPortal.Infrastructure.Messaging;
 using JobPortal.Infrastructure.Repository;
 using JobPortal.Infrastructure.Services;
+using JobPortal.Infrastructure.Workers;
 using Nest;
 using System.Reflection;
 
@@ -34,15 +36,15 @@ builder.Services.AddScoped(typeof(IElasticService<>), typeof(ElasticService<>));
 
 builder.Services.AddScoped<CreateJobHandler>();
 builder.Services.AddScoped<SearchJobHandler>();
+
 builder.Services.AddScoped<UpdateJobHandler>();
 
-
-
+//here
 var settings = new ConnectionSettings(
-    cloudId: "",
+    cloudId: "id",
     credentials: new BasicAuthenticationCredentials(
         "elastic",
-        ""
+        "password"
     )
 ).DefaultIndex("jobs").DisableDirectStreaming(); 
 
@@ -103,6 +105,19 @@ catch (ReflectionTypeLoadException ex)
 }
 
 builder.Services.AddAutoMapper(assemblyToScan);
+
+
+var kafkaSettings = new KafkaSetting();
+
+builder.Services.AddSingleton(kafkaSettings);
+builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();
+
+builder.Services.AddHostedService<KafkaConsumerWorker>();
+
+
+
+
+
 
 
 var app = builder.Build();
