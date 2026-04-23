@@ -1,10 +1,13 @@
+using Elasticsearch.Net;
+using JobPortal.API.Mapper;
 using JobPortal.Application.Handlers;
 using JobPortal.Application.Interfaces;
 using JobPortal.Infrastructure.Database;
 using JobPortal.Infrastructure.Repository;
 using JobPortal.Infrastructure.Services;
 using Nest;
-using static Dapper.SqlMapper;
+using System.Reflection;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,14 +37,71 @@ builder.Services.AddScoped<SearchJobHandler>();
 
 
 
-var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
-    .DefaultIndex("jobs");
-
+var settings = new ConnectionSettings(
+    cloudId: "Id",
+    credentials: new BasicAuthenticationCredentials(
+        "elastic",
+        "password"
+    )
+).DefaultIndex("jobs").DisableDirectStreaming(); 
 
 builder.Services.AddSingleton(new ElasticClient(settings));
 
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
+
+
+
+
+
+
+
+
+
+
+
+
+var client = new ElasticClient(settings);
+
+//Create INDEX if it does not exist
+var exists = await client.Indices.ExistsAsync("jobs");
+if (!exists.Exists)
+{
+    var createResponse = await client.Indices.CreateAsync("jobs", c => c
+        .Map(m => m.AutoMap())
+    );
+
+    Console.WriteLine("Index created: " + createResponse.IsValid);
+}
+
+
+
+
+
+
+// register in DI
+builder.Services.AddSingleton(client);
+
+
+
+
+
+
+
+
+var assemblyToScan = typeof(CreateJobHandler).Assembly;
+try
+{
+    var types = assemblyToScan.GetTypes();
+    Console.WriteLine($"Loaded {types.Length} types OK");
+}
+catch (ReflectionTypeLoadException ex)
+{
+    foreach (var le in ex.LoaderExceptions)
+        Console.WriteLine("LOADER EX: " + le?.Message);
+}
+
+builder.Services.AddAutoMapper(assemblyToScan);
 
 
 var app = builder.Build();

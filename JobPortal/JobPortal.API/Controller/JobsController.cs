@@ -24,8 +24,8 @@ namespace JobPortal.API.Controller
 
         public async Task<IActionResult>Create(CreateJobCommand command)
         {
-            var id = await _createHandler.Handle(command);
-            return  Ok(id);
+            var id = await _createHandler.Handle(command);   // calls business logic ,handler does real work like chef in restaurant & command/query order slip
+            return  Ok("Jobs created sucessfully");
         }
 
         [HttpGet("search")]

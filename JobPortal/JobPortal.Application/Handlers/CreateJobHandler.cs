@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace JobPortal.Application.Handlers
 {
-    public class CreateJobHandler
+    public class CreateJobHandler  //Handlers vaneko workers 
     {
-        private readonly IJobRepository _repo;
-        private readonly IElasticService<Job> _elastic;
+        private readonly IJobRepository _repo; //Talks to sql
+        private readonly IElasticService<Job> _elastic;  //Talks to elastic search
 
         public CreateJobHandler(IJobRepository repo, IElasticService<Job> elastic)
         {
             _repo = repo;
-            _elastic = elastic;
+            _elastic = elastic;  //
         }
 
         public async Task<int>Handle(CreateJobCommand command)
@@ -29,7 +29,11 @@ namespace JobPortal.Application.Handlers
                 Company = command.Company,
                 Salary = command.Salary
             };
-            var id = await _repo.CreateAsync(job);
+            var id = await _repo.CreateAsync(job);    // creates job object and saves in sql 
+
+            job.Id = id;
+            await _elastic.IndexAsync(job);   // send to elastic search
+
             return id;
         }
     }

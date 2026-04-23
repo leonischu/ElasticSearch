@@ -8,7 +8,7 @@ namespace JobPortal.Domain.Models
 {
     public class Job
     {
-        public int id { get; set; }
+        public int Id { get; set; }
 
         public string Title { get; set; }
 

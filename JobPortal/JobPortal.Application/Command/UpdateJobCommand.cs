@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace JobPortal.Application.Command
 {
-    public class CreateJobCommand
+    public class UpdateJobCommand : IRequest<bool>
     {
+        public int Id { get; set; }
 
-        public string Title { get; set; }
+        public string Title { get; set; }   
 
         public string Description { get; set; }
 
-        public string Company { get; set; }
+        public string Company {  get; set; }
 
         public decimal Salary { get; set; }
     }
