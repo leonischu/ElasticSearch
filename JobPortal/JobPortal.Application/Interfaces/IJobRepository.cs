@@ -11,6 +11,9 @@ namespace JobPortal.Application.Interfaces
     {
         Task<int> CreateAsync(Job job);
 
-        Task<IEnumerable<Job>> GetAllAsync();   
+        Task<IEnumerable<Job>> GetAllAsync();  
+        
+        Task <bool>UpdateAsync(Job job);
+        Task<Job> GetByIdAsync(int id); 
     }
 }

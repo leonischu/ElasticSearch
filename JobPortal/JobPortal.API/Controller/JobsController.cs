@@ -13,11 +13,13 @@ namespace JobPortal.API.Controller
 
         private readonly CreateJobHandler _createHandler;
         private readonly SearchJobHandler _searchHandler;
+        private readonly UpdateJobHandler _updateHandler;
 
-        public JobsController(CreateJobHandler createHandler , SearchJobHandler searchHandler)
+        public JobsController(CreateJobHandler createHandler , SearchJobHandler searchHandler,UpdateJobHandler updateHandler)
         {
-          _createHandler = createHandler;
+            _createHandler = createHandler;
             _searchHandler = searchHandler;
+            _updateHandler = updateHandler;
         }
 
         [HttpPost]
@@ -38,6 +40,29 @@ namespace JobPortal.API.Controller
             });
             return Ok(result);
         }
+
+
+        [HttpPut("{id}")]
+
+        public async Task<IActionResult> Update(int id, UpdateJobCommand command)
+        {
+
+
+
+            if (id != command.Id) // User sending wrong id in the url
+                return BadRequest("Id mismatch");
+
+            var result = await _updateHandler.Handle(command);
+
+            if (!result)
+                return NotFound("Job not found");
+            return Ok("Job Updated Sucessfully");
+        }
+
+
+
+
+
 
 
     }

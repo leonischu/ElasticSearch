@@ -34,14 +34,15 @@ builder.Services.AddScoped(typeof(IElasticService<>), typeof(ElasticService<>));
 
 builder.Services.AddScoped<CreateJobHandler>();
 builder.Services.AddScoped<SearchJobHandler>();
+builder.Services.AddScoped<UpdateJobHandler>();
 
 
 
 var settings = new ConnectionSettings(
-    cloudId: "Id",
+    cloudId: "",
     credentials: new BasicAuthenticationCredentials(
         "elastic",
-        "password"
+        ""
     )
 ).DefaultIndex("jobs").DisableDirectStreaming(); 
 

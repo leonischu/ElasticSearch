@@ -35,5 +35,25 @@ namespace JobPortal.Infrastructure.Repository
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<Job>(sql);
         }
+
+        public async Task<Job> GetByIdAsync(int id)
+        {
+            var sql = "SELECT * FROM Jobs WHERE Id = @Id";
+
+            using var connection = _context.CreateConnection();
+
+            return await connection.QueryFirstOrDefaultAsync<Job>(sql, new { Id = id });
+        }
+
+        public async Task<bool> UpdateAsync(Job job)
+        {
+            var query = @"UPDATE Jobs SET  Title = @Title,
+                        Description=@Description,
+                        Company = @Company,
+                        Salary=@Salary
+                        WHERE Id = @Id";
+            using var connection = _context.CreateConnection();
+            return  await connection.ExecuteAsync(query, job) > 0;
+        }
     }
 }
