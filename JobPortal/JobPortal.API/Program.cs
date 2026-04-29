@@ -10,7 +10,6 @@ using JobPortal.Infrastructure.Workers;
 using Nest;
 using System.Reflection;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -41,10 +40,10 @@ builder.Services.AddScoped<UpdateJobHandler>();
 
 //here
 var settings = new ConnectionSettings(
-    cloudId: "id",
+    cloudId: "JobPortal:YXNpYS1zb3V0aDEuZ2NwLmVsYXN0aWMtY2xvdWQuY29tOjQ0MyQ4ODA0ZjdlMmE3MGU0NzdkODIyNGYzMmZlYjE0YWNkYyQ0M2R\r\nkNDFhZGQwODc0YWE2YTEwMjJhZjA4YjhlNmY3Ng==",
     credentials: new BasicAuthenticationCredentials(
         "elastic",
-        "password"
+        "dWcSehzuBytG0gywnftiOSZU"
     )
 ).DefaultIndex("jobs").DisableDirectStreaming(); 
 
@@ -83,7 +82,7 @@ if (!exists.Exists)
 
 
 // register in DI
-builder.Services.AddSingleton(client);
+//builder.Services.AddSingleton(client);
 
 
 
@@ -106,8 +105,8 @@ catch (ReflectionTypeLoadException ex)
 
 builder.Services.AddAutoMapper(assemblyToScan);
 
+var kafkaSettings = builder.Configuration.GetSection("Kafka").Get<KafkaSetting>();
 
-var kafkaSettings = new KafkaSetting();
 
 builder.Services.AddSingleton(kafkaSettings);
 builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();

@@ -44,16 +44,25 @@ namespace JobPortal.Infrastructure.Workers
                 {
                     var result = consumer.Consume(stoppingToken); // pauses until kafka senda message
 
-                    var jobEvent = JsonSerializer.Deserialize<JobUpdatedEvent>(result.Message.Value); // convert json to object 
-
-                    var job = new Job  // creates job object and maps the event 
+                    //  handle null/tombstone safely
+                    if (result?.Message?.Value == null)
                     {
-                        Id = jobEvent.Id,
-                        Title = jobEvent.Title,
-                        Description = jobEvent.Description,
-                        Company = jobEvent.Company,
-                        Salary = jobEvent.Salary
-                    };
+                        consumer.Commit(result);
+                        continue;
+                    }
+
+                    var debeziumEvent = JsonSerializer.Deserialize<DebeziumMessage<Job>>(result.Message.Value);
+
+                    var job = debeziumEvent?.Payload?.After;
+
+                    if (job == null)
+                    {
+                        // delete case or invalid message
+                        consumer.Commit(result);
+                        continue;
+                    }
+
+                    var payload = debeziumEvent.Payload;
 
                     //  Create scope here
                     using (var scope = _scopeFactory.CreateScope())   // creates temporary DI container 
